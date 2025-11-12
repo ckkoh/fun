@@ -1,0 +1,224 @@
+# Model Training Configuration
+
+# Deep Neural Network
+dnn:
+  num_numbers: 49
+  embedding_dim: 32
+  hidden_dims: [512, 256, 128]
+  dropout: 0.3
+  history_length: 20
+  learning_rate: 0.001
+  batch_size: 32
+  epochs: 100
+  early_stopping_patience: 10
+
+# LSTM with Attention
+lstm:
+  input_dim: 128
+  lstm_hidden_dims: [256, 128]
+  dense_dims: [128, 64]
+  dropout: 0.3
+  sequence_length: 50
+  learning_rate: 0.0005
+  batch_size: 32
+  epochs: 100
+  early_stopping_patience: 10
+  gradient_clip: 1.0
+
+# LightGBM
+lightgbm:
+  n_estimators: 1000
+  max_depth: 8
+  learning_rate: 0.05
+  num_leaves: 31
+  min_child_samples: 20
+  feature_fraction: 0.8
+  bagging_fraction: 0.8
+  bagging_freq: 5
+  early_stopping_rounds: 50
+  verbose: -1
+
+# Random Forest
+random_forest:
+  n_estimators: 300
+  max_depth: 15
+  min_samples_split: 10
+  min_samples_leaf: 4
+  max_features: "sqrt"
+  bootstrap: true
+  oob_score: true
+  n_jobs: -1
+  random_state: 42
+
+# Transformer
+transformer:
+  num_numbers: 49
+  d_model: 256
+  nhead: 8
+  num_layers: 4
+  dim_feedforward: 512
+  dropout: 0.1
+  max_seq_len: 100
+  learning_rate: 0.0001
+  batch_size: 32
+  epochs: 100
+  early_stopping_patience: 10
+  warmup_steps: 1000
+
+# General Training Settings
+training:
+  # Device: 'cuda', 'cpu', or 'mps' (for Apple Silicon)
+  device: "cpu"
+
+  # Random seed for reproducibility
+  random_seed: 42
+
+  # Number of workers for data loading
+  num_workers: 4
+
+  # Pin memory for faster GPU transfer
+  pin_memory: true
+
+  # Mixed precision training (for GPU)
+  mixed_precision: false
+
+  # Gradient accumulation steps
+  gradient_accumulation_steps: 1
+
+  # Model checkpoint directory
+  checkpoint_dir: "models/checkpoints"
+
+  # Save checkpoint frequency (epochs)
+  save_frequency: 5
+
+  # Keep only best N checkpoints
+  keep_best_n: 3
+
+# Hyperparameter Optimization
+hyperparameter_tuning:
+  # Enable hyperparameter tuning
+  enabled: false
+
+  # Optimization framework: 'optuna' or 'hyperopt'
+  framework: "optuna"
+
+  # Number of trials
+  n_trials: 100
+
+  # Optimization direction: 'maximize' or 'minimize'
+  direction: "maximize"
+
+  # Metric to optimize
+  metric: "avg_matches"
+
+  # Pruning (early stopping of unpromising trials)
+  pruning: true
+
+  # Timeout per trial (seconds)
+  trial_timeout: 3600
+
+# Ensemble Configuration
+ensemble:
+  # Ensemble method: 'weighted_average', 'voting', or 'stacking'
+  method: "weighted_average"
+
+  # Model weights (only for weighted_average)
+  weights:
+    dnn: 1.0
+    lstm: 1.0
+    lgb: 1.0
+    rf: 1.0
+    transformer: 1.0
+
+  # Voting parameters (only for voting method)
+  voting:
+    top_k: 10  # Each model votes for top K numbers
+
+  # Stacking parameters (only for stacking method)
+  stacking:
+    meta_model: "lgb"  # 'lgb', 'rf', or 'linear'
+
+# Cross-Validation
+cross_validation:
+  # Enable cross-validation
+  enabled: true
+
+  # Number of folds
+  n_splits: 5
+
+  # CV method: 'time_series' or 'expanding_window'
+  method: "expanding_window"
+
+  # Minimum training samples
+  min_train_size: 500
+
+# Reward Function
+reward:
+  # Reward type: 'prize_aligned' or 'normalized'
+  type: "prize_aligned"
+
+  # Prize-aligned rewards (Singapore Pools structure)
+  prize_aligned:
+    group_1: 1000000  # 6 matches
+    group_2: 100000   # 5 + additional
+    group_3: 10000    # 5 matches
+    group_4: 1000     # 4 matches
+    group_5: 50       # 3 + additional
+    group_6: 25       # 3 matches
+    baseline: -10     # < 3 matches
+
+  # Normalized rewards (for stable training)
+  normalized:
+    six_matches: 1.0
+    five_plus_add: 0.8
+    five_matches: 0.6
+    four_matches: 0.4
+    three_plus_add: 0.2
+    three_matches: 0.1
+    two_matches: -0.3
+    one_match: -0.6
+    no_matches: -1.0
+
+# Experiment Tracking
+experiment_tracking:
+  # Enable MLflow
+  mlflow:
+    enabled: true
+    tracking_uri: "http://localhost:5000"
+    experiment_name: "toto-prediction"
+
+  # Enable Weights & Biases
+  wandb:
+    enabled: false
+    project: "toto-ml"
+    entity: null
+
+  # Log frequency (batches)
+  log_frequency: 10
+
+  # Log gradients
+  log_gradients: false
+
+  # Log model architecture
+  log_model_graph: true
+
+# Data Augmentation (if applicable)
+data_augmentation:
+  enabled: false
+  methods:
+    - "noise_injection"
+    - "temporal_jitter"
+
+# Model Selection Criteria
+model_selection:
+  # Primary metric for model selection
+  primary_metric: "avg_matches"
+
+  # Secondary metrics (for tie-breaking)
+  secondary_metrics:
+    - "validation_loss"
+    - "group_3_plus_rate"  # Rate of 3+ matches
+
+  # Minimum performance threshold
+  min_performance:
+    avg_matches: 0.75  # Must beat random baseline (0.7347)

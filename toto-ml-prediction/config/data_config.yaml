@@ -1,0 +1,111 @@
+# Data Collection Configuration
+
+data_collection:
+  # Base URL for Singapore Pools TOTO results
+  base_url: "https://www.singaporepools.com.sg/en/product/Pages/toto_results.aspx"
+
+  # Rate limiting (seconds between requests)
+  rate_limit: 2.0
+
+  # Maximum retry attempts for failed requests
+  max_retries: 3
+
+  # Retry backoff multiplier
+  retry_backoff: 2.0
+
+  # Mock mode for development/testing
+  mock_mode: true
+
+  # Historical data collection
+  historical:
+    # First TOTO draw date
+    start_date: "1968-06-09"
+
+    # Collect up to current date
+    auto_end_date: true
+
+database:
+  # Database type: 'sqlite' or 'postgresql'
+  type: "sqlite"
+
+  # SQLite path
+  sqlite_path: "data/toto.db"
+
+  # PostgreSQL connection (if type='postgresql')
+  postgresql:
+    host: "localhost"
+    port: 5432
+    database: "toto_ml"
+    user: "toto_user"
+    password: "toto_password"
+
+  # Connection pool size
+  pool_size: 5
+
+  # Enable query logging
+  echo: false
+
+feature_engineering:
+  # Lookback windows for frequency features
+  lookback_windows: [5, 10, 20, 50, 100]
+
+  # Sequence length for RNN/LSTM models
+  sequence_length: 50
+
+  # Include external features (holidays, etc.)
+  include_external_features: true
+
+  # Feature selection
+  feature_selection:
+    enabled: true
+    method: "mutual_info"  # or 'correlation', 'rfe'
+    max_features: 200
+
+data_splits:
+  # Training set size
+  train_size: 0.70
+
+  # Validation set size
+  val_size: 0.15
+
+  # Test set size
+  test_size: 0.15
+
+  # Ensure splits are time-series aware
+  time_series_split: true
+
+logging:
+  # Logging level
+  level: "INFO"
+
+  # Log file path
+  file: "logs/data_pipeline.log"
+
+  # Max log file size (bytes)
+  max_bytes: 10485760  # 10MB
+
+  # Number of backup log files
+  backup_count: 5
+
+  # Log format
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+monitoring:
+  # Data quality check frequency
+  quality_check_frequency: "daily"
+
+  # Alert on missing draws
+  alert_on_missing_draws: true
+
+  # Alert threshold (days without update)
+  alert_threshold_days: 5
+
+  # Enable automated updates
+  automated_updates: true
+
+  # Update schedule (cron-like)
+  update_schedule:
+    - day: "Monday"
+      time: "19:30"  # After draw at 18:30
+    - day: "Thursday"
+      time: "19:30"
