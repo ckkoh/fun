@@ -1,7 +1,7 @@
 -- Singapore Pools 4D Database Schema
 
 -- Main draws table
-CREATE TABLE IF NOT EXISTS 4d_draws (
+CREATE TABLE IF NOT EXISTS four_d_draws (
     draw_id INTEGER PRIMARY KEY AUTOINCREMENT,
     draw_number INTEGER UNIQUE NOT NULL,
     draw_date DATE NOT NULL,
@@ -44,14 +44,14 @@ CREATE TABLE IF NOT EXISTS 4d_draws (
 );
 
 -- Number history table for frequency analysis
-CREATE TABLE IF NOT EXISTS 4d_number_history (
+CREATE TABLE IF NOT EXISTS four_d_number_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     draw_id INTEGER NOT NULL,
     number VARCHAR(4) NOT NULL,
     prize_category VARCHAR(20) NOT NULL,  -- 'first', 'second', 'third', 'starter', 'consolation'
     position INTEGER,  -- Position in category (1-10 for starter/consolation, NULL for top 3)
 
-    FOREIGN KEY (draw_id) REFERENCES 4d_draws(draw_id) ON DELETE CASCADE,
+    FOREIGN KEY (draw_id) REFERENCES four_d_draws(draw_id) ON DELETE CASCADE,
     CONSTRAINT valid_category CHECK (prize_category IN ('first', 'second', 'third', 'starter', 'consolation')),
     CONSTRAINT valid_position CHECK (position IS NULL OR (position >= 1 AND position <= 10))
 );
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS digit_frequency (
     last_appearance_date DATE,
 
     PRIMARY KEY (digit, position),
-    FOREIGN KEY (last_appearance_draw_id) REFERENCES 4d_draws(draw_id) ON DELETE SET NULL
+    FOREIGN KEY (last_appearance_draw_id) REFERENCES four_d_draws(draw_id) ON DELETE SET NULL
 );
 
 -- 4D number frequency (full 4-digit numbers)
@@ -80,17 +80,17 @@ CREATE TABLE IF NOT EXISTS number_frequency (
     last_appearance_date DATE,
     last_appearance_draw_id INTEGER,
 
-    FOREIGN KEY (last_appearance_draw_id) REFERENCES 4d_draws(draw_id) ON DELETE SET NULL
+    FOREIGN KEY (last_appearance_draw_id) REFERENCES four_d_draws(draw_id) ON DELETE SET NULL
 );
 
 -- Indexes for better query performance
-CREATE INDEX IF NOT EXISTS idx_4d_draws_date ON 4d_draws(draw_date);
-CREATE INDEX IF NOT EXISTS idx_4d_draws_day ON 4d_draws(day_of_week);
-CREATE INDEX IF NOT EXISTS idx_4d_draws_number ON 4d_draws(draw_number);
+CREATE INDEX IF NOT EXISTS idx_four_d_draws_date ON four_d_draws(draw_date);
+CREATE INDEX IF NOT EXISTS idx_four_d_draws_day ON four_d_draws(day_of_week);
+CREATE INDEX IF NOT EXISTS idx_four_d_draws_number ON four_d_draws(draw_number);
 
-CREATE INDEX IF NOT EXISTS idx_number_history_draw ON 4d_number_history(draw_id);
-CREATE INDEX IF NOT EXISTS idx_number_history_number ON 4d_number_history(number);
-CREATE INDEX IF NOT EXISTS idx_number_history_category ON 4d_number_history(prize_category);
+CREATE INDEX IF NOT EXISTS idx_number_history_draw ON four_d_number_history(draw_id);
+CREATE INDEX IF NOT EXISTS idx_number_history_number ON four_d_number_history(number);
+CREATE INDEX IF NOT EXISTS idx_number_history_category ON four_d_number_history(prize_category);
 
 CREATE INDEX IF NOT EXISTS idx_digit_freq_digit ON digit_frequency(digit);
 CREATE INDEX IF NOT EXISTS idx_digit_freq_position ON digit_frequency(position);

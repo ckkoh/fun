@@ -66,7 +66,7 @@ class FourDDatabaseManager:
         try:
             # Check if draw already exists
             cursor.execute(
-                "SELECT draw_id FROM 4d_draws WHERE draw_number = ?",
+                "SELECT draw_id FROM four_d_draws WHERE draw_number = ?",
                 (draw_data['draw_number'],)
             )
             if cursor.fetchone():
@@ -75,7 +75,7 @@ class FourDDatabaseManager:
 
             # Insert main draw data
             cursor.execute("""
-                INSERT INTO 4d_draws (
+                INSERT INTO four_d_draws (
                     draw_number, draw_date, day_of_week,
                     first_prize, second_prize, third_prize,
                     starter_1, starter_2, starter_3, starter_4, starter_5,
@@ -136,7 +136,7 @@ class FourDDatabaseManager:
                     numbers_to_insert.append((draw_id, draw_data[key], 'consolation', i))
 
             cursor.executemany("""
-                INSERT INTO 4d_number_history (draw_id, number, prize_category, position)
+                INSERT INTO four_d_number_history (draw_id, number, prize_category, position)
                 VALUES (?, ?, ?, ?)
             """, numbers_to_insert)
 
@@ -244,7 +244,7 @@ class FourDDatabaseManager:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        query = "SELECT * FROM 4d_draws ORDER BY draw_date ASC"
+        query = "SELECT * FROM four_d_draws ORDER BY draw_date ASC"
         if limit:
             query += f" LIMIT {limit}"
 
@@ -260,7 +260,7 @@ class FourDDatabaseManager:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT * FROM 4d_draws
+            SELECT * FROM four_d_draws
             WHERE draw_date BETWEEN ? AND ?
             ORDER BY draw_date ASC
         """, (start_date, end_date))
@@ -276,7 +276,7 @@ class FourDDatabaseManager:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT * FROM 4d_draws
+            SELECT * FROM four_d_draws
             ORDER BY draw_date DESC, draw_number DESC
             LIMIT 1
         """)
@@ -296,10 +296,10 @@ class FourDDatabaseManager:
             cursor.execute("""
                 SELECT digit, COUNT(*) as count
                 FROM digit_frequency df
-                JOIN 4d_draws d ON df.last_appearance_draw_id = d.draw_id
+                JOIN four_d_draws d ON df.last_appearance_draw_id = d.draw_id
                 WHERE df.position = ?
                 AND d.draw_id IN (
-                    SELECT draw_id FROM 4d_draws
+                    SELECT draw_id FROM four_d_draws
                     ORDER BY draw_date DESC
                     LIMIT ?
                 )
@@ -322,13 +322,13 @@ class FourDDatabaseManager:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT COUNT(*) as count FROM 4d_draws")
+        cursor.execute("SELECT COUNT(*) as count FROM four_d_draws")
         total_draws = cursor.fetchone()['count']
 
-        cursor.execute("SELECT MIN(draw_date) as min_date, MAX(draw_date) as max_date FROM 4d_draws")
+        cursor.execute("SELECT MIN(draw_date) as min_date, MAX(draw_date) as max_date FROM four_d_draws")
         date_range = cursor.fetchone()
 
-        cursor.execute("SELECT COUNT(DISTINCT number) as count FROM 4d_number_history")
+        cursor.execute("SELECT COUNT(DISTINCT number) as count FROM four_d_number_history")
         unique_numbers = cursor.fetchone()['count']
 
         conn.close()
